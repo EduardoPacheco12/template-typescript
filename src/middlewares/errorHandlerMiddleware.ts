@@ -1,23 +1,19 @@
-import { Request, Response, NextFunction} from "express";
+import { NextFunction, Request, Response } from 'express';
 
-const ERRORS = {
-	bad_request: 400,
-	unauthorized: 401,
-	not_found: 404,
-	conflict: 409,
-	unprocessable_entity: 422
+export function errorHandlerMiddleware(err: Error | any, req: Request, res: Response, next: NextFunction) {
+  console.log(err);
+  if (err.type) {
+    return res.status(errorTypeToStatusCode(err.type)).send(err.message);
+  }
+
+  return res.sendStatus(500);
 }
 
-export default function errorHandlerMiddleware(
-	error, 
-	req: Request, 
-	res: Response, 
-	next: NextFunction
-) {
-	console.log(error);
-	const type: string = error.type;
-	let statusCode = Error[type];
-	if(!statusCode) statusCode === 500; 
+function errorTypeToStatusCode(errorType: string) {
+  if (errorType === 'unprocessable entity') return 422;
+  if (errorType === 'conflict') return 409;
+  if (errorType === 'not_found') return 404;
+  if (errorType === 'unauthorized') return 401;
 
-	return res.sendStatus(statusCode);
+  return 400;
 }
